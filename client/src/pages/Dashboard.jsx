@@ -161,10 +161,10 @@ export default function Dashboard() {
         <div className="chart-card card animate-fade-in">
           <div className="section-header" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0 }}>Spending Overview</h3>
-            <select 
-              value={chartPeriod} 
-              onChange={(e) => setChartPeriod(e.target.value)} 
-              className="input-field" 
+            <select
+              value={chartPeriod}
+              onChange={(e) => setChartPeriod(e.target.value)}
+              className="input-field"
               style={{ padding: '6px 36px 6px 12px', fontSize: '0.9rem', width: 'auto' }}
             >
               <option value="this_week">This Week</option>
