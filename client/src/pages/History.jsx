@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import { CATEGORIES } from '../utils/categories';
+import CurrencySelector from '../components/CurrencySelector';
 import ExpenseCard from '../components/ExpenseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ConfirmModal from '../components/ConfirmModal';
 import './History.css';
 
 export default function History() {
@@ -23,6 +25,9 @@ export default function History() {
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [editLoading, setEditLoading] = useState(false);
+
+  // Delete modal
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const loadExpenses = useCallback(async (page = 1) => {
     setLoading(true);
@@ -47,13 +52,19 @@ export default function History() {
     loadExpenses(1);
   }, [loadExpenses]);
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this expense?')) return;
+  const handleDelete = (id) => {
+    setDeleteConfirm(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
     try {
-      await api.delete(`/expenses/${id}`);
+      await api.delete(`/expenses/${deleteConfirm}`);
       loadExpenses(pagination.page);
     } catch (err) {
       console.error('Delete error:', err);
+    } finally {
+      setDeleteConfirm(null);
     }
   };
 
@@ -225,14 +236,21 @@ export default function History() {
                   />
                 </div>
                 <div className="input-group" style={{ flex: 1 }}>
-                  <label>Date</label>
-                  <input
-                    type="date"
-                    className="input-field"
-                    value={editForm.date}
-                    onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                  <label>Currency</label>
+                  <CurrencySelector
+                    value={editForm.currency}
+                    onChange={(val) => setEditForm({ ...editForm, currency: val })}
                   />
                 </div>
+              </div>
+              <div className="input-group">
+                <label>Date</label>
+                <input
+                  type="date"
+                  className="input-field"
+                  value={editForm.date}
+                  onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                />
               </div>
 
               <div className="input-group">
@@ -279,6 +297,15 @@ export default function History() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        title="Delete Expense"
+        message="Are you sure you want to delete this expense? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

@@ -91,4 +91,25 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
+// PUT /api/auth/profile
+router.put('/profile', auth, async (req, res) => {
+  try {
+    const { preferredCurrency } = req.body;
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (preferredCurrency) {
+      user.preferredCurrency = preferredCurrency;
+    }
+
+    await user.save();
+    res.json({ user: user.toJSON() });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;

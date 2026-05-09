@@ -55,7 +55,7 @@ export default function Landing() {
 
       <div className="features-section container">
         <h2 className="features-heading text-center">
-          Why <span className="text-orange">SpendWise</span>?
+          Why <span className="text-orange">Billy.</span>?
         </h2>
         <div className="features-grid">
           {[
@@ -77,7 +77,7 @@ export default function Landing() {
 
       <footer className="landing-footer container text-center">
         <p className="text-secondary text-sm">
-          Built with ❤️ and 🧾 • SpendWise © {new Date().getFullYear()}
+          Built with ❤️ and 🧾 • Billy. © {new Date().getFullYear()}
         </p>
       </footer>
     </div>

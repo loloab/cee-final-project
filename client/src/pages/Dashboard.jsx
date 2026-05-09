@@ -8,6 +8,7 @@ import { getCategoryByName, CATEGORIES } from '../utils/categories';
 import StatsCard from '../components/StatsCard';
 import ExpenseCard from '../components/ExpenseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ConfirmModal from '../components/ConfirmModal';
 import './Dashboard.css';
 
 export default function Dashboard() {
@@ -19,6 +20,7 @@ export default function Dashboard() {
   const [categoryData, setCategoryData] = useState([]);
   const [recentExpenses, setRecentExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   useEffect(() => {
     loadDashboard();
@@ -44,13 +46,19 @@ export default function Dashboard() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this expense?')) return;
+  const handleDelete = (id) => {
+    setDeleteConfirm(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
     try {
-      await api.delete(`/expenses/${id}`);
+      await api.delete(`/expenses/${deleteConfirm}`);
       loadDashboard();
     } catch (err) {
       console.error('Delete error:', err);
+    } finally {
+      setDeleteConfirm(null);
     }
   };
 
@@ -227,6 +235,14 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        title="Delete Expense"
+        message="Are you sure you want to delete this expense? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

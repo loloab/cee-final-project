@@ -9,7 +9,7 @@ export default function CurrencySelector({ value, onChange, className = '' }) {
     >
       {CURRENCIES.map((c) => (
         <option key={c.code} value={c.code}>
-          {c.symbol} {c.code} — {c.name}
+          {c.symbol} {c.code}
         </option>
       ))}
     </select>
