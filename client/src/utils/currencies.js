@@ -24,3 +24,29 @@ export function formatAmount(amount, currencyCode = 'THB') {
   });
   return `${symbol}${formatted}`;
 }
+
+/**
+ * Formats a number with K / M / B suffix when it's large,
+ * always showing exactly 2 decimal places for consistency.
+ * e.g. 1000 -> "฿1.00K", 1500 -> "฿1.50K", 999 -> "฿999.00"
+ */
+export function formatAmountCompact(amount, currencyCode = 'THB') {
+  const symbol = getCurrencySymbol(currencyCode);
+  const num = Number(amount);
+  const abs = Math.abs(num);
+  let value, suffix;
+  if (abs >= 1_000_000_000) {
+    value = num / 1_000_000_000;
+    suffix = 'B';
+  } else if (abs >= 1_000_000) {
+    value = num / 1_000_000;
+    suffix = 'M';
+  } else if (abs >= 1_000) {
+    value = num / 1_000;
+    suffix = 'K';
+  } else {
+    value = num;
+    suffix = '';
+  }
+  return `${symbol}${value.toFixed(2)}${suffix}`;
+}

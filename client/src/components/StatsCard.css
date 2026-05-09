@@ -21,10 +21,13 @@
 }
 
 .stats-value {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: var(--text-primary);
   margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stats-label {

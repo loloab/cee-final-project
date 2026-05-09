@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { formatAmount } from '../utils/currencies';
+import { formatAmount, formatAmountCompact } from '../utils/currencies';
 import { getCategoryByName, CATEGORIES } from '../utils/categories';
 import StatsCard from '../components/StatsCard';
 import ExpenseCard from '../components/ExpenseCard';
@@ -22,36 +22,80 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [chartPeriod, setChartPeriod] = useState('this_week');
+  const [categoryPeriod, setCategoryPeriod] = useState('this_week');
+  const initialized = useRef(false);
 
   useEffect(() => {
     loadDashboard();
   }, [currency]);
 
   useEffect(() => {
-    if (!loading) loadCharts();
-  }, [chartPeriod, currency, loading]);
+    if (initialized.current) loadBarChart();
+  }, [chartPeriod, currency]);
 
-  const loadCharts = async () => {
+  useEffect(() => {
+    if (initialized.current) loadCategoryChart();
+  }, [categoryPeriod, currency]);
+
+  const loadBarChart = async () => {
     try {
-      let catPeriod = 'week';
       let chartPromise;
-
       if (chartPeriod === 'this_week') {
-        catPeriod = 'week';
         chartPromise = api.get(`/stats/daily?weeks=1&currency=${currency}`);
       } else if (chartPeriod === 'this_month') {
-        catPeriod = 'month';
         chartPromise = api.get(`/stats/daily?weeks=4&currency=${currency}`);
       } else if (chartPeriod === 'this_year') {
-        catPeriod = 'year';
+        chartPromise = api.get(`/stats/monthly?year=${new Date().getFullYear()}&currency=${currency}`);
+      }
+      const chartRes = await chartPromise;
+      if (chartPeriod === 'this_year') {
+        setDaily(chartRes.data.monthly);
+      } else {
+        setDaily(chartRes.data.daily);
+      }
+    } catch (err) {
+      console.error('Bar chart load error:', err);
+    }
+  };
+
+  const loadCategoryChart = async () => {
+    try {
+      let period = 'week';
+      if (categoryPeriod === 'this_week') period = 'week';
+      else if (categoryPeriod === 'this_month') period = 'month';
+      else if (categoryPeriod === 'this_year') period = 'year';
+      const catRes = await api.get(`/stats/categories?period=${period}&currency=${currency}`);
+      setCategoryData(catRes.data.categories);
+    } catch (err) {
+      console.error('Category chart load error:', err);
+    }
+  };
+
+  const loadDashboard = async () => {
+    try {
+      // Fetch everything in parallel so the dashboard renders complete on first paint
+      let chartPromise;
+      if (chartPeriod === 'this_week') {
+        chartPromise = api.get(`/stats/daily?weeks=1&currency=${currency}`);
+      } else if (chartPeriod === 'this_month') {
+        chartPromise = api.get(`/stats/daily?weeks=4&currency=${currency}`);
+      } else {
         chartPromise = api.get(`/stats/monthly?year=${new Date().getFullYear()}&currency=${currency}`);
       }
 
-      const [chartRes, catRes] = await Promise.all([
+      let catPeriod = 'week';
+      if (categoryPeriod === 'this_month') catPeriod = 'month';
+      else if (categoryPeriod === 'this_year') catPeriod = 'year';
+
+      const [summaryRes, expRes, chartRes, catRes] = await Promise.all([
+        api.get(`/stats/summary?currency=${currency}`),
+        api.get('/expenses?limit=5'),
         chartPromise,
-        api.get(`/stats/categories?period=${catPeriod}&currency=${currency}`)
+        api.get(`/stats/categories?period=${catPeriod}&currency=${currency}`),
       ]);
 
+      setSummary(summaryRes.data);
+      setRecentExpenses(expRes.data.expenses);
       if (chartPeriod === 'this_year') {
         setDaily(chartRes.data.monthly);
       } else {
@@ -59,23 +103,10 @@ export default function Dashboard() {
       }
       setCategoryData(catRes.data.categories);
     } catch (err) {
-      console.error('Charts load error:', err);
-    }
-  };
-
-  const loadDashboard = async () => {
-    try {
-      const [summaryRes, expRes] = await Promise.all([
-        api.get(`/stats/summary?currency=${currency}`),
-        api.get('/expenses?limit=5'),
-      ]);
-
-      setSummary(summaryRes.data);
-      setRecentExpenses(expRes.data.expenses);
-    } catch (err) {
       console.error('Dashboard load error:', err);
     } finally {
       setLoading(false);
+      initialized.current = true;
     }
   };
 
@@ -135,21 +166,21 @@ export default function Dashboard() {
         <StatsCard
           icon="☀️"
           label="Today"
-          value={formatAmount(summary?.today || 0, currency)}
+          value={formatAmountCompact(summary?.today || 0, currency)}
           color="var(--orange-500)"
           delay={0}
         />
         <StatsCard
           icon="📅"
           label="This Week"
-          value={formatAmount(summary?.thisWeek || 0, currency)}
+          value={formatAmountCompact(summary?.thisWeek || 0, currency)}
           color="var(--info)"
           delay={100}
         />
         <StatsCard
           icon="📆"
           label="This Month"
-          value={formatAmount(summary?.thisMonth || 0, currency)}
+          value={formatAmountCompact(summary?.thisMonth || 0, currency)}
           color="var(--cat-entertainment)"
           delay={200}
         />
@@ -158,7 +189,7 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="charts-grid">
         {/* Daily Bar Chart */}
-        <div className="chart-card card animate-fade-in">
+        <div className="chart-card card animate-fade-in" style={{ animationDelay: '150ms' }}>
           <div className="section-header" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0 }}>Spending Overview</h3>
             <select
@@ -210,7 +241,19 @@ export default function Dashboard() {
 
         {/* Category Pie Chart */}
         <div className="chart-card card animate-fade-in" style={{ animationDelay: '150ms' }}>
-          <h3>Spending by Category</h3>
+          <div className="section-header" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0 }}>Spending by Category</h3>
+            <select
+              value={categoryPeriod}
+              onChange={(e) => setCategoryPeriod(e.target.value)}
+              className="input-field"
+              style={{ padding: '6px 36px 6px 12px', fontSize: '0.9rem', width: 'auto' }}
+            >
+              <option value="this_week">This Week</option>
+              <option value="this_month">This Month</option>
+              <option value="this_year">This Year</option>
+            </select>
+          </div>
           <div className="chart-container">
             {categoryData.length > 0 ? (
               <div className="pie-chart-wrapper">
