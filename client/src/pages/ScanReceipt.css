@@ -1,0 +1,157 @@
+.scan-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Upload Zone */
+.upload-zone {
+  padding: 60px 40px;
+  text-align: center;
+  border: 3px dashed var(--gray-300);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--surface);
+}
+
+.upload-zone:hover {
+  border-color: var(--orange-400);
+  background: var(--orange-50);
+}
+
+.upload-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+}
+
+/* Scanning State */
+.scanning-state {
+  padding: 48px;
+}
+
+.scan-preview {
+  max-height: 200px;
+  border-radius: var(--radius-md);
+  margin: 0 auto 24px;
+  object-fit: contain;
+}
+
+.scanning-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--orange-500);
+  animation: pulse 1s ease infinite;
+}
+
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* Review Layout */
+.review-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.preview-panel {
+  padding: 16px;
+  position: sticky;
+  top: 80px;
+  align-self: start;
+}
+
+.receipt-img {
+  width: 100%;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  max-height: 500px;
+}
+
+.review-form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.amount-input {
+  font-size: 1.3rem !important;
+  font-weight: 900 !important;
+  text-align: center;
+}
+
+/* Items */
+.items-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.item-name {
+  flex: 2;
+  padding: 10px 12px !important;
+  font-size: 0.9rem !important;
+}
+
+.item-price {
+  flex: 1;
+  padding: 10px 12px !important;
+  font-size: 0.9rem !important;
+  text-align: right;
+}
+
+/* Actions */
+.review-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.success-card {
+  padding: 48px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-panel {
+    position: static;
+  }
+
+  .receipt-img {
+    max-height: 300px;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+}

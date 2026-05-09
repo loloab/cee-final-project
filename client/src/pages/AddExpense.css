@@ -1,0 +1,85 @@
+.add-expense-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.page-title {
+  margin-bottom: 20px;
+}
+
+.page-title h1 {
+  margin-bottom: 4px;
+}
+
+.add-expense-form-card {
+  padding: 28px;
+}
+
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.amount-input {
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
+  text-align: center;
+}
+
+/* Category Grid */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.category-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 2px solid var(--gray-200);
+  border-bottom: 3px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.category-chip:hover {
+  border-color: var(--gray-300);
+  transform: translateY(-1px);
+}
+
+.category-chip.selected {
+  border-bottom-color: var(--chip-color);
+  transform: translateY(-1px);
+}
+
+.chip-emoji {
+  font-size: 1.2rem;
+}
+
+.success-card {
+  padding: 48px;
+}
+
+@media (max-width: 500px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+}
