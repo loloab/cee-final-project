@@ -67,9 +67,8 @@ router.get('/daily', async (req, res) => {
     const { weeks = 1, currency = 'THB' } = req.query;
 
     const now = new Date();
-    const startDate = new Date(now);
-    startDate.setDate(startDate.getDate() - parseInt(weeks) * 7);
-    startDate.setHours(0, 0, 0, 0);
+    // Start N weeks ago, including today. For weeks=1, that's 7 days total.
+    const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - parseInt(weeks) * 7 + 1);
 
     const expenses = await Expense.find({
       userId: req.userId,
@@ -82,7 +81,11 @@ router.get('/daily', async (req, res) => {
 
     // Initialize all days
     for (let d = new Date(startDate); d <= now; d.setDate(d.getDate() + 1)) {
-      const key = d.toISOString().split('T')[0];
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const dateStr = String(d.getDate()).padStart(2, '0');
+      const key = `${year}-${month}-${dateStr}`;
+      
       dailyMap[key] = {
         date: key,
         day: dayNames[d.getDay()],
@@ -92,7 +95,12 @@ router.get('/daily', async (req, res) => {
 
     // Sum expenses
     for (const exp of expenses) {
-      const key = new Date(exp.date).toISOString().split('T')[0];
+      const ed = new Date(exp.date);
+      const year = ed.getFullYear();
+      const month = String(ed.getMonth() + 1).padStart(2, '0');
+      const dateStr = String(ed.getDate()).padStart(2, '0');
+      const key = `${year}-${month}-${dateStr}`;
+
       if (dailyMap[key]) {
         const converted = await convertAmount(exp.amount, exp.currency, currency);
         dailyMap[key].total += converted;
