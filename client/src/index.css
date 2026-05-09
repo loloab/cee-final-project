@@ -44,7 +44,7 @@
   --cat-other: #AFAFAF;
 
   /* Layout */
-  --bg-warm: #FFFAF5;
+  --bg-warm: #FFFFFF;
   --surface: #FFFFFF;
   --text-primary: #3C3C3C;
   --text-secondary: #777777;
@@ -241,6 +241,7 @@ h4 { font-size: 1.1rem; }
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .input-group label {
@@ -252,6 +253,7 @@ h4 { font-size: 1.1rem; }
 }
 
 .input-field {
+  width: 100%;
   padding: 14px 16px;
   font-size: 1rem;
   border: 2px solid var(--gray-300);
@@ -283,6 +285,9 @@ select.input-field {
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 textarea.input-field {

@@ -42,7 +42,7 @@ Rules:
 - The total should match the receipt total, not the sum of items (which may exclude tax/service)`;
 
   const response = await client.models.generateContent({
-    model: 'gemini-2.0-flash',
+    model: 'gemini-2.5-flash',
     contents: [
       {
         role: 'user',
@@ -64,7 +64,7 @@ Rules:
   });
 
   const text = response.text;
-  
+
   try {
     const parsed = JSON.parse(text);
     return parsed;

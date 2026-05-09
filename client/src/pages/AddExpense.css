@@ -32,6 +32,10 @@
   text-align: center;
 }
 
+.currency-dropdown {
+  height: 100%;
+}
+
 /* Category Grid */
 .category-grid {
   display: grid;

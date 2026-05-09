@@ -94,7 +94,7 @@ export default function AddExpense() {
               </div>
               <div className="input-group" style={{ flex: 1 }}>
                 <label>Currency</label>
-                <CurrencySelector value={currency} onChange={setCurrency} />
+                <CurrencySelector value={currency} onChange={setCurrency} className="currency-dropdown" />
               </div>
             </div>
 

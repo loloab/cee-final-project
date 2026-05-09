@@ -8,6 +8,7 @@ import { getCategoryByName, CATEGORIES } from '../utils/categories';
 import StatsCard from '../components/StatsCard';
 import ExpenseCard from '../components/ExpenseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ConfirmModal from '../components/ConfirmModal';
 import './Dashboard.css';
 
 export default function Dashboard() {
@@ -19,23 +20,57 @@ export default function Dashboard() {
   const [categoryData, setCategoryData] = useState([]);
   const [recentExpenses, setRecentExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [chartPeriod, setChartPeriod] = useState('this_week');
 
   useEffect(() => {
     loadDashboard();
   }, [currency]);
 
+  useEffect(() => {
+    if (!loading) loadCharts();
+  }, [chartPeriod, currency, loading]);
+
+  const loadCharts = async () => {
+    try {
+      let catPeriod = 'week';
+      let chartPromise;
+
+      if (chartPeriod === 'this_week') {
+        catPeriod = 'week';
+        chartPromise = api.get(`/stats/daily?weeks=1&currency=${currency}`);
+      } else if (chartPeriod === 'this_month') {
+        catPeriod = 'month';
+        chartPromise = api.get(`/stats/daily?weeks=4&currency=${currency}`);
+      } else if (chartPeriod === 'this_year') {
+        catPeriod = 'year';
+        chartPromise = api.get(`/stats/monthly?year=${new Date().getFullYear()}&currency=${currency}`);
+      }
+
+      const [chartRes, catRes] = await Promise.all([
+        chartPromise,
+        api.get(`/stats/categories?period=${catPeriod}&currency=${currency}`)
+      ]);
+
+      if (chartPeriod === 'this_year') {
+        setDaily(chartRes.data.monthly);
+      } else {
+        setDaily(chartRes.data.daily);
+      }
+      setCategoryData(catRes.data.categories);
+    } catch (err) {
+      console.error('Charts load error:', err);
+    }
+  };
+
   const loadDashboard = async () => {
     try {
-      const [summaryRes, dailyRes, catRes, expRes] = await Promise.all([
+      const [summaryRes, expRes] = await Promise.all([
         api.get(`/stats/summary?currency=${currency}`),
-        api.get(`/stats/daily?weeks=1&currency=${currency}`),
-        api.get(`/stats/categories?period=month&currency=${currency}`),
         api.get('/expenses?limit=5'),
       ]);
 
       setSummary(summaryRes.data);
-      setDaily(dailyRes.data.daily);
-      setCategoryData(catRes.data.categories);
       setRecentExpenses(expRes.data.expenses);
     } catch (err) {
       console.error('Dashboard load error:', err);
@@ -44,13 +79,19 @@ export default function Dashboard() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this expense?')) return;
+  const handleDelete = (id) => {
+    setDeleteConfirm(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
     try {
-      await api.delete(`/expenses/${id}`);
+      await api.delete(`/expenses/${deleteConfirm}`);
       loadDashboard();
     } catch (err) {
       console.error('Delete error:', err);
+    } finally {
+      setDeleteConfirm(null);
     }
   };
 
@@ -118,13 +159,32 @@ export default function Dashboard() {
       <div className="charts-grid">
         {/* Daily Bar Chart */}
         <div className="chart-card card animate-fade-in">
-          <h3>Daily Spending (This Week)</h3>
+          <div className="section-header" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0 }}>Spending Overview</h3>
+            <select 
+              value={chartPeriod} 
+              onChange={(e) => setChartPeriod(e.target.value)} 
+              className="input-field" 
+              style={{ padding: '6px 36px 6px 12px', fontSize: '0.9rem', width: 'auto' }}
+            >
+              <option value="this_week">This Week</option>
+              <option value="this_month">This Month</option>
+              <option value="this_year">This Year</option>
+            </select>
+          </div>
           <div className="chart-container">
             {daily.length > 0 ? (
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={daily} barCategoryGap="20%">
                   <XAxis
-                    dataKey="day"
+                    dataKey={chartPeriod === 'this_year' ? 'month' : (chartPeriod === 'this_week' ? 'day' : 'date')}
+                    tickFormatter={(val) => {
+                      if (chartPeriod === 'this_month' && val && val.includes('-')) {
+                        const parts = val.split('-');
+                        return `${parts[1]}/${parts[2]}`;
+                      }
+                      return val;
+                    }}
                     tick={{ fill: '#777', fontWeight: 700, fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
@@ -133,7 +193,7 @@ export default function Dashboard() {
                     tick={{ fill: '#777', fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
-                    width={60}
+                    width={45}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="total" fill="var(--orange-500)" radius={[8, 8, 0, 0]} />
@@ -227,6 +287,14 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        title="Delete Expense"
+        message="Are you sure you want to delete this expense? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }
