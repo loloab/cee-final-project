@@ -50,7 +50,7 @@ export default function Navbar() {
       <div className="navbar-inner container">
         <Link to={user ? '/dashboard' : '/'} className="navbar-brand">
           <span className="brand-icon">🧾</span>
-          <span className="brand-text">Billy.</span>
+          <span className="brand-text">Billy</span>
         </Link>
 
         {user && (
@@ -93,7 +93,7 @@ export default function Navbar() {
         <div className="modal-overlay" onClick={() => setShowSettings(false)}>
           <div className="modal card animate-slide-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px', width: '90%' }}>
             <h2>User Settings</h2>
-            
+
             <div className="modal-form mt-md">
               <div className="input-group">
                 <label>Preferred Currency</label>

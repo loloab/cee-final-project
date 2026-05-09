@@ -7,6 +7,29 @@ import CurrencySelector from '../components/CurrencySelector';
 import LoadingSpinner from '../components/LoadingSpinner';
 import './AddExpense.css';
 
+// Returns today's date in local time as YYYY-MM-DD
+function localToday() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+// YYYY-MM-DD → DD/MM/YYYY
+function toDisplay(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// DD/MM/YYYY → YYYY-MM-DD (returns null if invalid)
+function toISO(display) {
+  const match = display.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return null;
+  return `${match[3]}-${match[2]}-${match[1]}`;
+}
+
 export default function AddExpense() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -16,7 +39,7 @@ export default function AddExpense() {
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [note, setNote] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(toDisplay(localToday()));
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -30,6 +53,12 @@ export default function AddExpense() {
       return;
     }
 
+    const isoDate = toISO(date);
+    if (!isoDate) {
+      setError('Please enter a valid date in DD/MM/YYYY format');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -39,7 +68,7 @@ export default function AddExpense() {
         category,
         description,
         note,
-        date,
+        date: isoDate,
         source: 'manual',
       });
 
@@ -150,13 +179,15 @@ export default function AddExpense() {
 
             {/* Date */}
             <div className="input-group">
-              <label htmlFor="expense-date">Date</label>
+              <label htmlFor="expense-date">Date (DD/MM/YYYY)</label>
               <input
                 id="expense-date"
-                type="date"
+                type="text"
                 className="input-field"
+                placeholder="DD/MM/YYYY"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
+                maxLength={10}
               />
             </div>
 
