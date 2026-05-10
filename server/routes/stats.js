@@ -28,7 +28,8 @@ router.get('/summary', async (req, res) => {
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startOfWeek = new Date(startOfDay);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    const _weekDay = startOfWeek.getDay();
+    startOfWeek.setDate(startOfWeek.getDate() - (_weekDay === 0 ? 6 : _weekDay - 1));
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const expenses = await Expense.find({
@@ -67,8 +68,16 @@ router.get('/daily', async (req, res) => {
     const { weeks = 1, currency = 'THB' } = req.query;
 
     const now = new Date();
-    // Start N weeks ago, including today. For weeks=1, that's 7 days total.
-    const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - parseInt(weeks) * 7 + 1);
+    // For weeks=1 (This Week), anchor to the most recent Monday.
+    // For larger ranges (This Month), keep a rolling window.
+    let startDate;
+    if (parseInt(weeks) === 1) {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const wd = startDate.getDay();
+      startDate.setDate(startDate.getDate() - (wd === 0 ? 6 : wd - 1));
+    } else {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - parseInt(weeks) * 7 + 1);
+    }
 
     const expenses = await Expense.find({
       userId: req.userId,
@@ -196,10 +205,12 @@ router.get('/categories', async (req, res) => {
     let startDate;
 
     switch (period) {
-      case 'week':
-        startDate = new Date(now);
-        startDate.setDate(startDate.getDate() - 7);
+      case 'week': {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const wd = startDate.getDay();
+        startDate.setDate(startDate.getDate() - (wd === 0 ? 6 : wd - 1));
         break;
+      }
       case 'year':
         startDate = new Date(now.getFullYear(), 0, 1);
         break;
