@@ -205,7 +205,7 @@ export default function Dashboard() {
           </div>
           <div className="chart-container">
             {daily.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={daily} barCategoryGap="20%">
                   <XAxis
                     dataKey={chartPeriod === 'this_year' ? 'month' : (chartPeriod === 'this_week' ? 'day' : 'date')}
