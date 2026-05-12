@@ -66,19 +66,3 @@ Visit **http://localhost:5173**
 4. Deploy — Vercel auto-detects the config from `vercel.json`
 
 ---
-
-## How to Deploy to Vercel
-
-The application is structured to be easily deployed on Vercel as a single project.
-
-1. Push your code to a GitHub repository.
-2. Log in to [Vercel](https://vercel.com) and click **Add New... > Project**.
-3. Import your GitHub repository.
-4. Expand the **Environment Variables** section and add the following keys with their respective values:
-   - `MONGODB_URI`
-   - `JWT_SECRET`
-   - `GEMINI_API_KEY`
-   - `NODE_ENV` (Set to `production`)
-5. Click **Deploy**. Vercel will automatically detect the build settings and use the `vercel.json` configuration for routing API requests to the serverless backend.
-
----
