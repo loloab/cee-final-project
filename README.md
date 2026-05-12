@@ -16,60 +16,52 @@
 
 ---
 
-## How to Set Up and Run Locally
+## How to Run Locally
 
-Follow these steps to get the project running on your local machine.
-
-### 1. Clone the Repository
-
-If you haven't already, clone the project and navigate into it:
-
-```bash
-git clone <your-repo-url>
-cd final-project
-```
-
-### 2. Set Up the Backend Environment
-
-The backend requires a few environment variables to connect to MongoDB and the Gemini API.
+### 1. Create `.env` file
 
 ```bash
 cp .env.example server/.env
 ```
 
-Open `server/.env` and fill in your details:
-```env
-MONGODB_URI=mongodb+srv://<your-username>:<your-password>@<your-cluster>.mongodb.net/billy?retryWrites=true&w=majority
-JWT_SECRET=your-secure-random-jwt-secret
+Edit `server/.env` with your values:
+```
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=pick-any-secret-string
 GEMINI_API_KEY=your-key-from-aistudio.google.com
 PORT=5000
 ```
 
-### 3. Install Dependencies and Start the Backend
-
-Open a terminal window, navigate to the `server` directory, install dependencies, and start the development server.
+### 2. Start the backend
 
 ```bash
 cd server
-npm install
 npm run dev
 ```
 
-The server should now be running on `http://localhost:5000`.
-
-### 4. Install Dependencies and Start the Frontend
-
-Open a **new** terminal window, navigate to the `client` directory, install dependencies, and start the Vite development server.
+### 3. Start the frontend (in another terminal)
 
 ```bash
 cd client
-npm install
 npm run dev
 ```
 
-### 5. Open the Application
+### 4. Open the app
 
-Visit **[http://localhost:5173](http://localhost:5173)** in your browser to start using Billy!
+Visit **http://localhost:5173**
+
+---
+
+## How to Deploy to Vercel
+
+1. Push the project to GitHub
+2. Import the repo in [Vercel](https://vercel.com)
+3. Add environment variables in Vercel's dashboard:
+   - `MONGODB_URI`
+   - `JWT_SECRET`
+   - `GEMINI_API_KEY`
+   - `NODE_ENV=production`
+4. Deploy — Vercel auto-detects the config from `vercel.json`
 
 ---
 
