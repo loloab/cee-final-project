@@ -18,6 +18,8 @@
 
 ## How to Run Locally
 
+After you've cloned this project:
+
 ### 1. Create `.env` file
 
 ```bash
